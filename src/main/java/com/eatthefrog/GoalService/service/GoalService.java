@@ -61,7 +61,7 @@ public class GoalService {
         return updateGoal(goal);
     }
 
-    @Transactional
+    @Transactional(rollbackFor=Exception.class)
     private void deleteGoalTransactional(Goal goal) {
         goalRepo.deleteById(goal.getId());
         eventServiceClient.deleteEventsForGoal(goal.getId());
