@@ -16,9 +16,6 @@ import java.util.Collection;
 @RequiredArgsConstructor
 public class GoalsController {
 
-    @Value("${EAT.THE.FROG.OKTA.BACKEND.SCOPE}")
-    private String scope;
-
     private final GoalService goalService;
 
     @ResponseStatus(value = HttpStatus.NOT_FOUND)
@@ -37,20 +34,20 @@ public class GoalsController {
 
     // Internal endpoints
 
-    @PreAuthorize("hasAuthority('SCOPE_'+#scope) or #userUuid == authentication.token.claims['uid']")
+    @PreAuthorize("hasAuthority('SCOPE_api') or #userUuid == authentication.token.claims['uid']")
     @GetMapping("/{userUuid}")
     public Collection<Goal> getGoalsForUser(@PathVariable String userUuid) {
         return goalService.getGoalsForUser(userUuid);
     }
 
-    @PreAuthorize("hasAuthority('SCOPE_'+#scope)")
+    @PreAuthorize("hasAuthority('SCOPE_api')")
     @PostMapping("/create/event")
     public ResponseEntity addEventToGoal(@RequestBody Event event) {
         goalService.addEventToGoal(event);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @PreAuthorize("hasAuthority('SCOPE_'+#scope)")
+    @PreAuthorize("hasAuthority('SCOPE_api')")
     @PostMapping("/delete/event")
     public ResponseEntity updateEventForGoal(@RequestBody Event event) {
         goalService.deleteEventFromGoal(event);
