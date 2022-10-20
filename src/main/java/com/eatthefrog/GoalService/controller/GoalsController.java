@@ -54,6 +54,13 @@ public class GoalsController {
         return ResponseEntity.ok().build();
     }
 
+    @PreAuthorize("hasAuthority('SCOPE_api')")
+    @DeleteMapping("/delete/user/{userUuid}")
+    public ResponseEntity deleteAllGoalsForUser(@PathVariable String userUuid) {
+        goalService.deleteAllGoalsForUser(userUuid);
+        return ResponseEntity.ok().build();
+    }
+
 
     // External endpoints
 
