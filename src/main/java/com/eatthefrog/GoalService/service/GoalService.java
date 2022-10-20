@@ -6,6 +6,8 @@ import com.eatthefrog.GoalService.model.Event;
 import com.eatthefrog.GoalService.model.Goal;
 import com.eatthefrog.GoalService.repository.GoalRepo;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.java.Log;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,6 +16,7 @@ import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.List;
 
+@Log
 @Service
 @RequiredArgsConstructor
 public class GoalService {
@@ -52,18 +55,23 @@ public class GoalService {
         return updateGoal(goal);
     }
 
-    public Collection<Goal> deleteEventFromGoal(Event event) {
-        Goal goal = getGoalById(event.getGoalId())
+    public Collection<Goal> deleteEventFromGoal(String eventId, String goalId) {
+        Goal goal = getGoalById(goalId)
                 .stream().findFirst()
-                .orElseThrow(() -> new GoalsController.ResourceNotFoundException("Couldn't find goal with id "+event.getGoalId()));
-        List<Event> events = goal.getCompletedEvents().stream().filter(currEvent -> !currEvent.getId().equals(event.getId())).toList();
+                .orElseThrow(() -> new GoalsController.ResourceNotFoundException("Couldn't find goal with id "+goalId));
+        List<Event> events = goal.getCompletedEvents().stream().filter(currEvent -> !currEvent.getId().equals(eventId)).toList();
         goal.setCompletedEvents(events);
         return updateGoal(goal);
     }
 
     @Transactional(rollbackFor=Exception.class)
     private void deleteGoalTransactional(Goal goal) {
-        goalRepo.deleteById(goal.getId());
-        eventServiceClient.deleteEventsForGoal(goal.getId());
+        try {
+            goalRepo.deleteById(goal.getId());
+            eventServiceClient.deleteEventsForGoal(goal.getId());
+        } catch(Exception e) {
+            log.severe(ExceptionUtils.getStackTrace(e));
+            throw e;
+        }
     }
 }

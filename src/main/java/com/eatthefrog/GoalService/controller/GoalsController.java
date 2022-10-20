@@ -48,9 +48,9 @@ public class GoalsController {
     }
 
     @PreAuthorize("hasAuthority('SCOPE_api')")
-    @PostMapping("/delete/event")
-    public ResponseEntity updateEventForGoal(@RequestBody Event event) {
-        goalService.deleteEventFromGoal(event);
+    @PostMapping("/{goalId}/delete/event/{eventId}")
+    public ResponseEntity updateEventForGoal(@PathVariable String goalId, @PathVariable String eventId) {
+        goalService.deleteEventFromGoal(eventId, goalId);
         return ResponseEntity.ok().build();
     }
 
