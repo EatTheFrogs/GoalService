@@ -7,7 +7,9 @@ import java.util.Collection;
 
 public interface GoalRepo extends MongoRepository<Goal, String> {
 
+    public Collection<Goal> findAllById(String id);
+
     public Collection<Goal> findAllByUserUuid(String userUuid);
 
-    public Collection<Goal> findAllByUserUuidOrderByUpdatedDateDesc(String userUuid);
+    public Collection<Goal> findAllByUserUuidOrderByCreatedDateDesc(String userUuid);
 }
