@@ -15,14 +15,27 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class EventServiceClient {
 
-    private static final String DELETE_PATH = "/delete/goal/{goalId}";
+    private static final String DELETE_FOR_GOAL_PATH = "/delete/goal/{goalId}";
+    private static final String DELETE_FOR_USER_PATH = "/delete/user/{userUuid}";
 
     private final WebClient eventServiceWebClient;
 
     public void deleteEventsForGoal(String goalId) {
         eventServiceWebClient.delete()
-                .uri(uriBuilder -> uriBuilder.path(DELETE_PATH)
+                .uri(uriBuilder -> uriBuilder.path(DELETE_FOR_GOAL_PATH)
                         .build(goalId))
+                .retrieve()
+                .onStatus(
+                        HttpStatus::isError,
+                        response -> response.bodyToMono(String.class).map(GoalsController.OperationFailedException::new))
+                .bodyToMono(Object.class)
+                .block();
+    }
+
+    public void deleteAllEventsForUser(String userUuid) {
+        eventServiceWebClient.delete()
+                .uri(uriBuilder -> uriBuilder.path(DELETE_FOR_USER_PATH)
+                        .build(userUuid))
                 .retrieve()
                 .onStatus(
                         HttpStatus::isError,

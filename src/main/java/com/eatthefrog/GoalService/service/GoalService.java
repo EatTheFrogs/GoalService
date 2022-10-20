@@ -47,6 +47,10 @@ public class GoalService {
         return getGoalsForUser(goal.getUserUuid());
     }
 
+    public void deleteAllGoalsForUser(String userUuid) {
+        deleteAllGoalsForUserTransactional(userUuid);
+    }
+
     public Collection<Goal> addEventToGoal(Event event) {
         Goal goal = getGoalById(event.getGoalId())
                 .stream().findFirst()
@@ -69,6 +73,17 @@ public class GoalService {
         try {
             goalRepo.deleteById(goal.getId());
             eventServiceClient.deleteEventsForGoal(goal.getId());
+        } catch(Exception e) {
+            log.severe(ExceptionUtils.getStackTrace(e));
+            throw e;
+        }
+    }
+
+    @Transactional(rollbackFor=Exception.class)
+    private void deleteAllGoalsForUserTransactional(String userUuid) {
+        try {
+            goalRepo.deleteByUserUuid(userUuid);
+            eventServiceClient.deleteAllEventsForUser(userUuid);
         } catch(Exception e) {
             log.severe(ExceptionUtils.getStackTrace(e));
             throw e;

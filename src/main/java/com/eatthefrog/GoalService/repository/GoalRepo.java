@@ -12,4 +12,6 @@ public interface GoalRepo extends MongoRepository<Goal, String> {
     public Collection<Goal> findAllByUserUuid(String userUuid);
 
     public Collection<Goal> findAllByUserUuidOrderByCreatedDateDesc(String userUuid);
+
+    public void deleteByUserUuid(String userUuid);
 }
