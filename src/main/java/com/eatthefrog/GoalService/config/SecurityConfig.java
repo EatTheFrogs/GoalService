@@ -29,11 +29,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
-    CorsConfigurationSource corsConfigurationSource() {
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**",
-                new CorsConfiguration().setAllowedOriginPatterns(List.of("http://localhost:3000", "https://eatthefrog.app")));
-        return source;
+    public WebMvcConfigurer corsMappingConfigurer() {
+        return new WebMvcConfigurer() {
+            @Override
+            public void addCorsMappings(CorsRegistry registry) {
+                registry.addMapping("/**")
+                        .allowedOrigins("http://localhost:3000", "https://eatthefrog.app");
+            }
+        };
     }
 
     @Bean
