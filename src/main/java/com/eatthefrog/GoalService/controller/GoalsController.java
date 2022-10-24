@@ -4,13 +4,18 @@ import com.eatthefrog.GoalService.model.Event;
 import com.eatthefrog.GoalService.model.Goal;
 import com.eatthefrog.GoalService.service.GoalService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.Collection;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -56,7 +61,7 @@ public class GoalsController {
 
     @PreAuthorize("hasAuthority('SCOPE_api')")
     @DeleteMapping("/delete/user/{userUuid}")
-    public ResponseEntity deleteAllGoalsForUser(@PathVariable String userUuid) {
+    public ResponseEntity deleteAllGoalsForUser(@PathVariable String userUuid) throws Exception {
         goalService.deleteAllGoalsForUser(userUuid);
         return ResponseEntity.ok().build();
     }
@@ -76,9 +81,9 @@ public class GoalsController {
         return goalService.updateGoal(goal);
     }
 
-    @PreAuthorize("#goal.getUserUuid() == authentication.token.claims['uid']")
-    @DeleteMapping("/delete")
-    public Collection<Goal> deleteGoal(@RequestBody Goal goal) {
-        return goalService.deleteGoal(goal);
+    @PreAuthorize("@goalService.assertUserOwnsGoal(#jwt.getClaim('uid').toString(), #goalId)")
+    @DeleteMapping("/delete/{goalId}")
+    public Collection<Goal> deleteGoal(@AuthenticationPrincipal Jwt jwt, @PathVariable String goalId) throws Exception {
+        return goalService.deleteGoal(goalId, jwt.getClaim("uid").toString());
     }
 }

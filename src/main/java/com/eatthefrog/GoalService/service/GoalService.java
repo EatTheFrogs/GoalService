@@ -7,9 +7,8 @@ import com.eatthefrog.GoalService.model.Goal;
 import com.eatthefrog.GoalService.repository.GoalRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
-import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -23,6 +22,7 @@ public class GoalService {
 
     private final GoalRepo goalRepo;
     private final EventServiceClient eventServiceClient;
+    private final TransactionHandlerService transactionHandlerService;
 
     public Collection<Goal> getGoalById(String goalId) {
         return goalRepo.findAllById(goalId);
@@ -42,13 +42,19 @@ public class GoalService {
         return getGoalsForUser(goal.getUserUuid());
     }
 
-    public Collection<Goal> deleteGoal(Goal goal) {
-        deleteGoalTransactional(goal);
-        return getGoalsForUser(goal.getUserUuid());
+    // Used in @Preauthorize annotation on controller
+    public boolean assertUserOwnsGoal(String userUuid, String goalId) {
+        Goal goal = getGoalById(goalId).stream().findFirst().orElseThrow(() -> new GoalsController.ResourceNotFoundException("Couldn't find goal with id "+goalId));
+        return StringUtils.equals(userUuid, goal.getUserUuid());
     }
 
-    public void deleteAllGoalsForUser(String userUuid) {
-        deleteAllGoalsForUserTransactional(userUuid);
+    public Collection<Goal> deleteGoal(String goalId, String userUuid) throws Exception {
+        transactionHandlerService.runInTransaction(() -> deleteGoalTransactional(goalId));
+        return getGoalsForUser(userUuid);
+    }
+
+    public void deleteAllGoalsForUser(String userUuid) throws Exception {
+        transactionHandlerService.runInTransaction(() -> deleteAllGoalsForUserTransactional(userUuid));
     }
 
     public Collection<Goal> addEventToGoal(Event event) {
@@ -68,25 +74,13 @@ public class GoalService {
         return updateGoal(goal);
     }
 
-    @Transactional(rollbackFor=Exception.class)
-    private void deleteGoalTransactional(Goal goal) {
-        try {
-            goalRepo.deleteById(goal.getId());
-            eventServiceClient.deleteEventsForGoal(goal.getId());
-        } catch(Exception e) {
-            log.severe(ExceptionUtils.getStackTrace(e));
-            throw e;
-        }
+    public void deleteGoalTransactional(String goalId) {
+        goalRepo.deleteById(goalId);
+        eventServiceClient.deleteEventsForGoal(goalId);
     }
 
-    @Transactional(rollbackFor=Exception.class)
-    private void deleteAllGoalsForUserTransactional(String userUuid) {
-        try {
-            goalRepo.deleteByUserUuid(userUuid);
-            eventServiceClient.deleteAllEventsForUser(userUuid);
-        } catch(Exception e) {
-            log.severe(ExceptionUtils.getStackTrace(e));
-            throw e;
-        }
+    public void deleteAllGoalsForUserTransactional(String userUuid) {
+        goalRepo.deleteByUserUuid(userUuid);
+        eventServiceClient.deleteAllEventsForUser(userUuid);
     }
 }
