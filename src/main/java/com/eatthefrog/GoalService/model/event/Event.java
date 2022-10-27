@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.validation.constraints.NotNull;
 import java.io.Serial;
@@ -18,6 +19,7 @@ import java.time.ZonedDateTime;
 @AllArgsConstructor
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", include=JsonTypeInfo.As.EXISTING_PROPERTY, visible = true)
 @JsonSubTypes( {@JsonSubTypes.Type(value = DefaultEvent.class, name = "default"), @JsonSubTypes.Type(value = LiftEvent.class, name = "lift")} )
+@Document(collection = "events")
 public abstract class Event extends BaseModel {
 
     @Serial
