@@ -1,21 +1,18 @@
 package com.eatthefrog.GoalService.controller;
 
-import com.eatthefrog.GoalService.model.Event;
-import com.eatthefrog.GoalService.model.Goal;
+import com.eatthefrog.GoalService.model.event.Event;
+import com.eatthefrog.GoalService.model.eventtemplate.EventTemplate;
+import com.eatthefrog.GoalService.model.goal.Goal;
 import com.eatthefrog.GoalService.service.GoalService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
 import java.util.Collection;
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -53,9 +50,23 @@ public class GoalsController {
     }
 
     @PreAuthorize("hasAuthority('SCOPE_api')")
-    @PostMapping("/{goalId}/delete/event/{eventId}")
-    public ResponseEntity updateEventForGoal(@PathVariable String goalId, @PathVariable String eventId) {
+    @PostMapping("/create/template")
+    public ResponseEntity addEventTemplateToGoal(@RequestBody EventTemplate eventTemplate) {
+        goalService.addEventTemplateToGoal(eventTemplate);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @PreAuthorize("hasAuthority('SCOPE_api')")
+    @DeleteMapping("/{goalId}/delete/event/{eventId}")
+    public ResponseEntity deleteEventForGoal(@PathVariable String goalId, @PathVariable String eventId) {
         goalService.deleteEventFromGoal(eventId, goalId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PreAuthorize("hasAuthority('SCOPE_api')")
+    @DeleteMapping("/{goalId}/delete/template/{templateId}")
+    public ResponseEntity deleteTemplateForGoal(@PathVariable String goalId, @PathVariable String templateId) {
+        goalService.deleteTemplateFromGoal(templateId, goalId);
         return ResponseEntity.ok().build();
     }
 

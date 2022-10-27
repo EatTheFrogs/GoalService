@@ -1,9 +1,11 @@
 package com.eatthefrog.GoalService.service;
 
 import com.eatthefrog.GoalService.client.EventServiceClient;
+import com.eatthefrog.GoalService.client.EventTemplateServiceClient;
 import com.eatthefrog.GoalService.controller.GoalsController;
-import com.eatthefrog.GoalService.model.Event;
-import com.eatthefrog.GoalService.model.Goal;
+import com.eatthefrog.GoalService.model.event.Event;
+import com.eatthefrog.GoalService.model.eventtemplate.EventTemplate;
+import com.eatthefrog.GoalService.model.goal.Goal;
 import com.eatthefrog.GoalService.repository.GoalRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
@@ -22,10 +24,11 @@ public class GoalService {
 
     private final GoalRepo goalRepo;
     private final EventServiceClient eventServiceClient;
+    private final EventTemplateServiceClient eventTemplateServiceClient;
     private final TransactionHandlerService transactionHandlerService;
 
-    public Collection<Goal> getGoalById(String goalId) {
-        return goalRepo.findAllById(goalId);
+    public Goal getGoalById(String goalId) {
+        return goalRepo.findById(goalId).orElseThrow(() -> new GoalsController.ResourceNotFoundException("Couldn't find goal with id "+goalId));
     }
     public Collection<Goal> getGoalsForUser(String userUuid) {
         return goalRepo.findAllByUserUuidOrderByCreatedDateDesc(userUuid);
@@ -44,7 +47,7 @@ public class GoalService {
 
     // Used in @Preauthorize annotation on controller
     public boolean assertUserOwnsGoal(String userUuid, String goalId) {
-        Goal goal = getGoalById(goalId).stream().findFirst().orElseThrow(() -> new GoalsController.ResourceNotFoundException("Couldn't find goal with id "+goalId));
+        Goal goal = getGoalById(goalId);
         return StringUtils.equals(userUuid, goal.getUserUuid());
     }
 
@@ -58,29 +61,40 @@ public class GoalService {
     }
 
     public Collection<Goal> addEventToGoal(Event event) {
-        Goal goal = getGoalById(event.getGoalId())
-                .stream().findFirst()
-                .orElseThrow(() -> new GoalsController.ResourceNotFoundException("Couldn't find goal with id "+event.getGoalId()));
+        Goal goal = getGoalById(event.getGoalId());
         goal.getCompletedEvents().add(event);
         return updateGoal(goal);
     }
 
+    public Collection<Goal> addEventTemplateToGoal(EventTemplate eventTemplate) {
+        Goal goal = getGoalById(eventTemplate.getGoalId());
+        goal.getEventTemplates().add(eventTemplate);
+        return updateGoal(goal);
+    }
+
     public Collection<Goal> deleteEventFromGoal(String eventId, String goalId) {
-        Goal goal = getGoalById(goalId)
-                .stream().findFirst()
-                .orElseThrow(() -> new GoalsController.ResourceNotFoundException("Couldn't find goal with id "+goalId));
+        Goal goal = getGoalById(goalId);
         List<Event> events = goal.getCompletedEvents().stream().filter(currEvent -> !currEvent.getId().equals(eventId)).toList();
         goal.setCompletedEvents(events);
+        return updateGoal(goal);
+    }
+
+    public Collection<Goal> deleteTemplateFromGoal(String templateId, String goalId) {
+        Goal goal = getGoalById(goalId);
+        List<EventTemplate> templates = goal.getEventTemplates().stream().filter(currTemplate -> !currTemplate.getId().equals(templateId)).toList();
+        goal.setEventTemplates(templates);
         return updateGoal(goal);
     }
 
     public void deleteGoalTransactional(String goalId) {
         goalRepo.deleteById(goalId);
         eventServiceClient.deleteEventsForGoal(goalId);
+        eventTemplateServiceClient.deleteTemplatesForGoal(goalId);
     }
 
     public void deleteAllGoalsForUserTransactional(String userUuid) {
         goalRepo.deleteByUserUuid(userUuid);
         eventServiceClient.deleteAllEventsForUser(userUuid);
+        eventTemplateServiceClient.deleteAllTemplatesForUser(userUuid);
     }
 }
