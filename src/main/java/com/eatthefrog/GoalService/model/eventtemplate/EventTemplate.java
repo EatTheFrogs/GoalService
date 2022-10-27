@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.io.Serial;
 
@@ -16,6 +17,7 @@ import java.io.Serial;
 @AllArgsConstructor
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", include=JsonTypeInfo.As.EXISTING_PROPERTY, visible = true)
 @JsonSubTypes( {@JsonSubTypes.Type(value = DefaultEventTemplate.class, name = "default"), @JsonSubTypes.Type(value = LiftEventTemplate.class, name = "lift")} )
+@Document(collection = "eventtemplates")
 public abstract class EventTemplate extends BaseModel {
 
     @Serial
