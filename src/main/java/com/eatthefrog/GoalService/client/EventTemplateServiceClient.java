@@ -7,20 +7,20 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import static com.eatthefrog.GoalService.config.WebClientConfig.EVENT_SERVICE_WEBCLIENT;
+import static com.eatthefrog.GoalService.config.WebClientConfig.EVENTTEMPLATE_SERVICE_WEBCLIENT;
 
 @Component
 @RequiredArgsConstructor
-public class EventServiceClient {
+public class EventTemplateServiceClient {
 
     private static final String DELETE_FOR_GOAL_PATH = "/delete/goal/{goalId}";
     private static final String DELETE_FOR_USER_PATH = "/delete/user/{userUuid}";
 
-    @Qualifier(EVENT_SERVICE_WEBCLIENT)
-    private final WebClient eventServiceWebClient;
+    @Qualifier(EVENTTEMPLATE_SERVICE_WEBCLIENT)
+    private final WebClient eventTemplateServiceWebClient;
 
-    public void deleteEventsForGoal(String goalId) {
-        eventServiceWebClient.delete()
+    public void deleteTemplatesForGoal(String goalId) {
+        eventTemplateServiceWebClient.delete()
                 .uri(uriBuilder -> uriBuilder.path(DELETE_FOR_GOAL_PATH)
                         .build(goalId))
                 .retrieve()
@@ -31,8 +31,8 @@ public class EventServiceClient {
                 .block();
     }
 
-    public void deleteAllEventsForUser(String userUuid) {
-        eventServiceWebClient.delete()
+    public void deleteAllTemplatesForUser(String userUuid) {
+        eventTemplateServiceWebClient.delete()
                 .uri(uriBuilder -> uriBuilder.path(DELETE_FOR_USER_PATH)
                         .build(userUuid))
                 .retrieve()

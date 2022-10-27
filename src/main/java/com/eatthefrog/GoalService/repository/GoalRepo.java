@@ -1,6 +1,6 @@
 package com.eatthefrog.GoalService.repository;
 
-import com.eatthefrog.GoalService.model.Goal;
+import com.eatthefrog.GoalService.model.goal.Goal;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.Collection;

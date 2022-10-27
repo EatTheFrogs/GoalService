@@ -1,5 +1,8 @@
-package com.eatthefrog.GoalService.model;
+package com.eatthefrog.GoalService.model.goal;
 
+import com.eatthefrog.GoalService.model.BaseModel;
+import com.eatthefrog.GoalService.model.event.Event;
+import com.eatthefrog.GoalService.model.eventtemplate.EventTemplate;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -31,5 +34,6 @@ public class Goal extends BaseModel {
     private String description;
     @DBRef
     private List<Event> completedEvents = new ArrayList<Event>();
+    @DBRef
     private List<EventTemplate> eventTemplates = new ArrayList<EventTemplate>();
 }

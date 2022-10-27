@@ -15,11 +15,20 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Configuration
 public class WebClientConfig {
 
+    public static final String EVENT_SERVICE_WEBCLIENT = "eventServiceWebClient";
+    public static final String EVENTTEMPLATE_SERVICE_WEBCLIENT = "eventTemplateServiceWebClient";
+
     @Value("${EventService.url}")
     private String EVENT_SERVICE_URL;
 
     @Value("${EventService.context-path}")
     private String EVENT_SERVICE_PATH;
+
+    @Value("${EventTemplateService.url}")
+    private String EVENTTEMPLATE_SERVICE_URL;
+
+    @Value("${EventTemplateService.context-path}")
+    private String EVENTTEMPLATE_SERVICE_PATH;
 
     @Bean
     public OAuth2AuthorizedClientManager authorizedClientManager(ClientRegistrationRepository clientRegistrationRepository,
@@ -36,7 +45,7 @@ public class WebClientConfig {
         return authorizedClientManager;
     }
 
-    @Bean
+    @Bean(name = EVENT_SERVICE_WEBCLIENT)
     public WebClient eventServiceWebClient(OAuth2AuthorizedClientManager authorizedClientManager) {
         ServletOAuth2AuthorizedClientExchangeFilterFunction oauth2Client = new ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager);
         oauth2Client.setDefaultClientRegistrationId("okta");
@@ -44,6 +53,17 @@ public class WebClientConfig {
         return WebClient.builder()
                 .apply(oauth2Client.oauth2Configuration())
                 .baseUrl(EVENT_SERVICE_URL + EVENT_SERVICE_PATH)
+                .build();
+    }
+
+    @Bean(name = EVENTTEMPLATE_SERVICE_WEBCLIENT)
+    public WebClient eventTemplateWebClient(OAuth2AuthorizedClientManager authorizedClientManager) {
+        ServletOAuth2AuthorizedClientExchangeFilterFunction oauth2Client = new ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager);
+        oauth2Client.setDefaultClientRegistrationId("okta");
+
+        return WebClient.builder()
+                .apply(oauth2Client.oauth2Configuration())
+                .baseUrl(EVENTTEMPLATE_SERVICE_URL + EVENTTEMPLATE_SERVICE_PATH)
                 .build();
     }
 }
