@@ -23,5 +23,10 @@ public class MongoConfig {
                 dateWritingConverter,
                 dateReadingConverter));
     }
+    
+    @Bean
+    MongoTransactionManager transactionManager(MongoDatabaseFactory dbFactory) {
+        return new MongoTransactionManager(dbFactory);
+    }
 }
 
