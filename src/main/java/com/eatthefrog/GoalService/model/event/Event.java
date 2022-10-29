@@ -1,6 +1,7 @@
 package com.eatthefrog.GoalService.model.event;
 
 import com.eatthefrog.GoalService.model.BaseModel;
+import com.eatthefrog.GoalService.model.event.field.EventField;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.AllArgsConstructor;
@@ -12,7 +13,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import javax.validation.constraints.NotNull;
 import java.io.Serial;
 import java.time.ZonedDateTime;
-
+import java.util.Collection;
 
 @Data
 @NoArgsConstructor
@@ -34,4 +35,7 @@ public abstract class Event extends BaseModel {
     private String name;
     @NotNull
     private String goalId;
+
+    public abstract Collection<? extends EventField> getFields();
+    public abstract void setFields(Collection<EventField> fields);
 }
