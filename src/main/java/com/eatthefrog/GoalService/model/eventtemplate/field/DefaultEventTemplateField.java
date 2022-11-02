@@ -1,5 +1,6 @@
 package com.eatthefrog.GoalService.model.eventtemplate.field;
 
+import com.eatthefrog.GoalService.model.event.field.Duration;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,4 +19,5 @@ public class DefaultEventTemplateField extends EventTemplateField {
 
     private String type;
     private String unit;
+    private Duration duration;
 }
