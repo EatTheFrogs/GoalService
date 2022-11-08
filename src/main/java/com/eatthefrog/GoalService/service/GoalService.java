@@ -15,7 +15,9 @@ import org.springframework.stereotype.Service;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Log
 @Service
@@ -31,7 +33,10 @@ public class GoalService {
         return goalRepo.findById(goalId).orElseThrow(() -> new GoalsController.ResourceNotFoundException("Couldn't find goal with id "+goalId));
     }
     public Collection<Goal> getGoalsForUser(String userUuid) {
-        return goalRepo.findAllByUserUuidOrderByCreatedDateDesc(userUuid);
+        List<Goal> goals = goalRepo.findAllByUserUuidOrderByCreatedDateDesc(userUuid).stream().collect(Collectors.toList());
+        goals.forEach(goal -> Collections.sort(goal.getCompletedEvents()));
+        Collections.sort(goals);
+        return goals;
     }
 
     public Collection<Goal> createGoal(Goal goal) {
@@ -62,7 +67,10 @@ public class GoalService {
 
     public Collection<Goal> addEventToGoal(Event event) {
         Goal goal = getGoalById(event.getGoalId());
-        goal.getCompletedEvents().add(event);
+        List<Event> events = goal.getCompletedEvents();
+        events.add(event);
+        Collections.sort(events);
+        goal.setCompletedEvents(events);
         return updateGoal(goal);
     }
 

@@ -20,7 +20,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Document(collection = "goals")
-public class Goal extends BaseModel {
+public class Goal extends BaseModel implements Comparable<Goal> {
 
     @Serial
     private static final long serialVersionUID = -8357126405162601677L;
@@ -36,4 +36,19 @@ public class Goal extends BaseModel {
     private List<Event> completedEvents = new ArrayList<Event>();
     @DBRef
     private List<EventTemplate> eventTemplates = new ArrayList<EventTemplate>();
+
+    @Override
+    public int compareTo(Goal goal) {
+
+        var thisEvents = this.completedEvents;
+        var thatEvents = goal.getCompletedEvents();
+
+        if(thisEvents.isEmpty()) {
+            return 1;
+        } else if(thatEvents.isEmpty()) {
+            return -1;
+        }
+
+        return thatEvents.get(0).getCompletedDate().compareTo(thisEvents.get(0).getCompletedDate());
+    }
 }

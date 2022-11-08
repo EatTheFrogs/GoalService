@@ -21,7 +21,7 @@ import java.util.Collection;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", include=JsonTypeInfo.As.EXISTING_PROPERTY, visible = true)
 @JsonSubTypes( {@JsonSubTypes.Type(value = DefaultEvent.class, name = "default"), @JsonSubTypes.Type(value = LiftEvent.class, name = "lift")} )
 @Document(collection = "events")
-public abstract class Event extends BaseModel {
+public abstract class Event extends BaseModel implements Comparable<Event> {
 
     @Serial
     private static final long serialVersionUID = -3721461690283380472L;
@@ -38,4 +38,9 @@ public abstract class Event extends BaseModel {
 
     public abstract Collection<? extends EventField> getFields();
     public abstract void setFields(Collection<EventField> fields);
+
+    @Override
+    public int compareTo(Event event){
+        return this.completedDate.isBefore(event.getCompletedDate()) ? 1 : -1;
+    }
 }
