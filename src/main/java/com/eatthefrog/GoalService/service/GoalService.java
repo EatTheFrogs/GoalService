@@ -65,33 +65,33 @@ public class GoalService {
         transactionHandlerService.runInTransaction(() -> deleteAllGoalsForUserTransactional(userUuid));
     }
 
-    public Collection<Goal> addEventToGoal(Event event) {
+    public void addEventToGoal(Event event) {
         Goal goal = getGoalById(event.getGoalId());
         List<Event> events = goal.getCompletedEvents();
         events.add(event);
         Collections.sort(events);
         goal.setCompletedEvents(events);
-        return updateGoal(goal);
+        goalRepo.save(goal);
     }
 
-    public Collection<Goal> addEventTemplateToGoal(EventTemplate eventTemplate) {
+    public void addEventTemplateToGoal(EventTemplate eventTemplate) {
         Goal goal = getGoalById(eventTemplate.getGoalId());
         goal.getEventTemplates().add(eventTemplate);
-        return updateGoal(goal);
+        goalRepo.save(goal);
     }
 
-    public Collection<Goal> deleteEventFromGoal(String eventId, String goalId) {
+    public void deleteEventFromGoal(String eventId, String goalId) {
         Goal goal = getGoalById(goalId);
         List<Event> events = goal.getCompletedEvents().stream().filter(currEvent -> !currEvent.getId().equals(eventId)).toList();
         goal.setCompletedEvents(events);
-        return updateGoal(goal);
+        goalRepo.save(goal);
     }
 
-    public Collection<Goal> deleteTemplateFromGoal(String templateId, String goalId) {
+    public void deleteTemplateFromGoal(String templateId, String goalId) {
         Goal goal = getGoalById(goalId);
         List<EventTemplate> templates = goal.getEventTemplates().stream().filter(currTemplate -> !currTemplate.getId().equals(templateId)).toList();
         goal.setEventTemplates(templates);
-        return updateGoal(goal);
+        goalRepo.save(goal);
     }
 
     public void deleteGoalTransactional(String goalId) {
